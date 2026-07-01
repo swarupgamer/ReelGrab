@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Reel Grab — save any public Instagram post</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101114;
+    --surface:#1a1c21;
+    --surface-2:#22252b;
+    --text:#f3f1ec;
+    --muted:#8a8d95;
+    --coral:#ff5a36;
+    --mint:#3ddc97;
+    --border:#2c2f36;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:26px 24px;max-width:1080px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem;}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--coral);}
+  nav.top a{font-size:.9rem;color:var(--muted);text-decoration:none;margin-left:28px;}
+  nav.top a:hover{color:var(--text);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;
+    padding:48px 24px 40px;max-width:1080px;margin:0 auto;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2.3rem,4vw,3.4rem);
+    line-height:1.05;margin:0 0 18px;letter-spacing:-0.01em;
+  }
+  h1 em{font-style:italic;color:var(--coral);}
+  .sub{color:var(--muted);font-size:1.05rem;line-height:1.6;margin:0 0 30px;max-width:480px;}
+
+  .paster{
+    display:flex;gap:10px;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:8px;
+  }
+  .paster input{
+    flex:1;background:transparent;border:none;outline:none;color:var(--text);
+    font-family:'JetBrains Mono',monospace;font-size:.92rem;padding:12px 14px;
+  }
+  .paster input::placeholder{color:#5b5e66;}
+  .paster button{
+    background:var(--coral);color:#161311;border:none;border-radius:10px;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:.92rem;
+    padding:12px 22px;cursor:pointer;transition:transform .15s ease, background .15s ease;
+    white-space:nowrap;
+  }
+  .paster button:hover{transform:translateY(-1px);background:#ff6c4a;}
+  .paster button:disabled{opacity:.55;cursor:not-allowed;transform:none;}
+
+  .fineprint{margin-top:12px;font-size:.8rem;color:#5b5e66;}
+  .fineprint b{color:var(--muted);}
+
+  .status{margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:.85rem;min-height:20px;}
+  .status.err{color:#ff8b6b;}
+  .status.ok{color:var(--mint);}
+
+  /* ---------- PHONE MOCK ---------- */
+  .phone{
+    width:270px;height:552px;margin:0 auto;border-radius:38px;
+    background:linear-gradient(160deg,var(--surface-2),var(--surface));
+    border:1px solid var(--border);padding:14px;position:relative;
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.6);
+  }
+  .phone .notch{
+    position:absolute;top:14px;left:50%;transform:translateX(-50%);
+    width:90px;height:20px;background:var(--bg);border-radius:12px;
+  }
+  .phone .screen{
+    width:100%;height:100%;border-radius:26px;background:#000;overflow:hidden;
+    position:relative;display:flex;align-items:center;justify-content:center;
+  }
+  .phone .screen img, .phone .screen video{width:100%;height:100%;object-fit:cover;display:block;}
+  .placeholder-screen{
+    color:#4b4e56;font-family:'JetBrains Mono',monospace;font-size:.78rem;text-align:center;padding:20px;
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+  }
+  .placeholder-screen svg{opacity:.5;}
+  .spinner{
+    width:34px;height:34px;border-radius:50%;border:3px solid #333;border-top-color:var(--coral);
+    animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .play-badge{
+    position:absolute;bottom:14px;left:14px;background:rgba(0,0,0,.55);
+    padding:5px 10px;border-radius:20px;font-size:.72rem;font-family:'JetBrains Mono',monospace;
+    display:flex;align-items:center;gap:5px;
+  }
+
+  /* ---------- SPROCKET DIVIDER (signature element) ---------- */
+  .sprocket{
+    display:flex;justify-content:space-between;padding:0 24px;max-width:1080px;margin:20px auto 0;
+  }
+  .sprocket span{width:12px;height:12px;border-radius:3px;background:var(--surface);border:1px solid var(--border);}
+
+  /* ---------- RESULTS ---------- */
+  section.results{max-width:1080px;margin:0 auto;padding:36px 24px 10px;display:none;}
+  section.results.show{display:block;}
+  .results-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;}
+  .results-head h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.4rem;margin:0;}
+  .results-head span{color:var(--muted);font-size:.85rem;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    overflow:hidden;display:flex;flex-direction:column;
+  }
+  .card .thumb{aspect-ratio:1/1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .card .thumb img,.card .thumb video{width:100%;height:100%;object-fit:cover;}
+  .card .meta{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .card .meta .tag{font-size:.72rem;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.04em;}
+  .card .dl{
+    background:var(--mint);color:#0d1a14;border:none;border-radius:8px;
+    font-weight:600;font-size:.82rem;padding:8px 14px;cursor:pointer;text-decoration:none;white-space:nowrap;
+  }
+  .card .dl:hover{background:#57e6ac;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .how{max-width:1080px;margin:70px auto;padding:0 24px;}
+  .how h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.9rem;margin-bottom:34px;}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .step{border-top:2px solid var(--border);padding-top:16px;}
+  .step .n{font-family:'JetBrains Mono',monospace;color:var(--coral);font-size:.85rem;}
+  .step h4{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:8px 0 8px;}
+  .step p{color:var(--muted);font-size:.92rem;line-height:1.55;margin:0;}
+
+  footer{max-width:1080px;margin:0 auto;padding:30px 24px 50px;color:#5b5e66;font-size:.82rem;border-top:1px solid var(--border);}
+
+  @media(max-width:800px){
+    .hero{grid-template-columns:1fr;}
+    .phone{margin-top:10px;}
+    .steps{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><span class="dot"></span>Reel Grab</div>
+  <nav class="top">
+    <a href="#how">How it works</a>
+    <a href="#note">Notes</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div>
+    <h1>Save any <em>public</em><br>Instagram post,<br>frame by frame.</h1>
+    <p class="sub">Paste a link to a reel, photo, carousel, or story highlight. We'll pull the original file — no watermark, no login, no app install.</p>
+
+    <div class="paster">
+      <input id="urlInput" type="text" placeholder="https://www.instagram.com/reel/..." />
+      <button id="fetchBtn">Fetch</button>
+    </div>
+    <div class="fineprint">Works on <b>public</b> posts, reels &amp; carousels only. Private accounts aren't supported.</div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="screen" id="screen">
+      <div class="placeholder-screen">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        preview appears here
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sprocket">
+  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+
+<section class="results" id="results">
+  <div class="results-head">
+    <h3>Found media</h3>
+    <span id="countLabel"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<div class="how" id="how">
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="n">01</div>
+      <h4>Copy the link</h4>
+      <p>Open the post in the Instagram app or site, tap the three dots, and choose "Copy link."</p>
+    </div>
+    <div class="step">
+      <div class="n">02</div>
+      <h4>Paste &amp; fetch</h4>
+      <p>Drop it in the box above. We resolve the original media file directly — nothing is re-encoded.</p>
+    </div>
+    <div class="step">
+      <div class="n">03</div>
+      <h4>Download</h4>
+      <p>Each photo or video in the post gets its own download button, full resolution.</p>
+    </div>
+  </div>
+</div>
+
+<footer id="note">
+  Reel Grab only works on content that's already public. It doesn't store links, files, or account data —
+  every request is resolved live and discarded. Respect creators: downloaded media is still their copyright.
+</footer>
+
+<script>
+const urlInput = document.getElementById('urlInput');
+const fetchBtn = document.getElementById('fetchBtn');
+const statusEl = document.getElementById('status');
+const screen = document.getElementById('screen');
+const results = document.getElementById('results');
+const grid = document.getElementById('grid');
+const countLabel = document.getElementById('countLabel');
+
+function setStatus(msg, kind){
+  statusEl.textContent = msg || '';
+  statusEl.className = 'status' + (kind ? ' ' + kind : '');
+}
+
+function showLoadingScreen(){
+  screen.innerHTML = '<div class="placeholder-screen"><div class="spinner"></div>fetching…</div>';
+}
+
+function resetScreen(){
+  screen.innerHTML = '<div class="placeholder-screen"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>preview appears here</div>';
+}
+
+async function handleFetch(){
+  const url = urlInput.value.trim();
+  if(!url){ setStatus('Paste a link first.', 'err'); return; }
+
+  fetchBtn.disabled = true;
+  showLoadingScreen();
+  setStatus('Resolving media…');
+  results.classList.remove('show');
+  grid.innerHTML = '';
+
+  try{
+    const res = await fetch('/api/resolve', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json();
+
+    if(!res.ok){
+      setStatus(data.error || 'Something went wrong.', 'err');
+      resetScreen();
+      return;
+    }
+
+    setStatus(`Found ${data.count} item${data.count>1?'s':''}.`, 'ok');
+    renderPreview(data.items[0]);
+    renderGrid(data.items);
+    results.classList.add('show');
+  }catch(e){
+    setStatus('Network error — is the server running?', 'err');
+    resetScreen();
+  }finally{
+    fetchBtn.disabled = false;
+  }
+}
+
+function renderPreview(item){
+  if(!item){ resetScreen(); return; }
+  if(item.type === 'video'){
+    screen.innerHTML = `<video src="${item.directUrl}" poster="${item.thumbnail||''}" controls playsinline></video>`;
+  } else {
+    screen.innerHTML = `<img src="${item.directUrl}" alt="preview" />`;
+  }
+}
+
+function renderGrid(items){
+  countLabel.textContent = items.length + (items.length>1 ? ' items in this post' : ' item');
+  grid.innerHTML = items.map((item, i) => {
+    const thumbSrc = item.type === 'image' ? item.directUrl : (item.thumbnail || item.directUrl);
+    const dlHref = `/api/download?src=${encodeURIComponent(item.directUrl)}&name=reelgrab_${i+1}&ext=${item.ext}`;
+    return `
+      <div class="card">
+        <div class="thumb"><img src="${thumbSrc}" alt="item ${i+1}" loading="lazy"/></div>
+        <div class="meta">
+          <span class="tag">${item.type}${item.durationSec ? ' · ' + Math.round(item.durationSec) + 's' : ''}</span>
+          <a class="dl" href="${dlHref}">Download</a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+fetchBtn.addEventListener('click', handleFetch);
+urlInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleFetch(); });
+</script>
+
+</body>
+  </html>
